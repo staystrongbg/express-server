@@ -1,19 +1,46 @@
 import { Request, Response } from 'express';
+import { PrismaClient } from '@prisma/client';
 
-export const getBooks = (req: Request, res: Response) => {
-  res.json('this is endpoint for booklist');
+const prisma = new PrismaClient();
+
+export const getBooks = async (req: Request, res: Response) => {
+  const bookList = await prisma.books.findMany({});
+
+  res.json(bookList);
 };
 
-export const getBook = (req: Request, res: Response) => {
+export const getBook = async (req: Request, res: Response) => {
   const { bookId } = req.params;
-  res.json(`this endpoint is a book with id: ${bookId}`);
+  const book = await prisma.books.findUnique({
+    where: {
+      id: +bookId,
+    },
+  });
+  res.json(book);
 };
 
-export const deleteBook = (req: Request, res: Response) => {
+export const deleteBook = async (req: Request, res: Response) => {
   const { bookId } = req.params;
-  res.json(`this endpoint deletes book with id: ${bookId} controller`);
+  const books = await prisma.books.delete({
+    where: {
+      id: +bookId,
+    },
+  });
+
+  res.json(books);
 };
 
-export const addBook = (req: Request, res: Response) => {
-  res.json(`this endpoint adds new book`);
+export const addBook = async (req: Request, res: Response) => {
+  const { id, title, author, description, image, createdAt } = req.body;
+  console.log(title, author);
+  const book = await prisma.books.create({
+    data: {
+      title,
+      author,
+      description,
+      img: image,
+      createdAt,
+    },
+  });
+  res.json(book);
 };
